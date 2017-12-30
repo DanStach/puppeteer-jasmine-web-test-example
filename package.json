@@ -1,0 +1,19 @@
+{
+  "name": "jasmine-web-tests",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "@types/jasmine": "^2.8.2",
+    "@types/puppeteer": "^0.13.6",
+    "jasmine": "^2.8.0",
+    "jasmine-spec-reporter": "^4.2.1",
+    "jasmine-ts": "^0.2.1",
+    "puppeteer": "^0.13.0"
+  },
+  "scripts": {
+    "test": "jasmine-ts \"spec/**/*.spec.ts\""
+  },
+  "author": "",
+  "license": "ISC"
+}
