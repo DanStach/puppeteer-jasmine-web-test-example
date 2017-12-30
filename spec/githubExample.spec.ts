@@ -16,33 +16,84 @@
  * 2017-12-29  DanS  Inital template for web tests
  **************************************************************************************************************/
 
+import * as filenamify from "filenamify";
+import * as fs from "fs-extra";
 import * as puppeteer from "puppeteer";
-
-
+import * as uuidv1 from "uuid/v1";
 
 /***************************************************************************************************************
  *                              Global Variables
  **************************************************************************************************************/
 const blogSearchPhrase = '"2015 the United States Federal"';
+const password = "Taillight88*";
+const accountEmail = "taillight." + uuidv1().replace(new RegExp("-", "g"), "");+ "@mailinator.com";
+const pageWidth = 1440;
+const pageHeight = 1280;
 
+
+process.on("unhandledRejection", r => {
+    console.warn("Unhandled Promise Rejection:");
+    console.error(r);
+    throw r;
+});
+
+interface ITestContext {
+    browser: puppeteer.Browser;
+    page: puppeteer.Page;
+    uuid: string;
+    screenshotDir: string;
+    screenshot: (filename?: string) => Promise<string>;
+}
 
 /***************************************************************************************************************
- *                              Global Variables
+ *                              Testcase Grouping
  **************************************************************************************************************/
 describe("GitHub Web Example", function() {
-    beforeEach(async function(this: {browser: puppeteer.Browser}) {
-        this.browser = await puppeteer.launch({
-            headless: false, // false means browser is visable, true means browser is hidden and runs faster
-            slowMo: 250, // slows actions down so we can view it (.25 sec wait per action)
-        });
+
+    beforeAll(async function(this: ITestContext) {
+        const screenshotDir = `./screenshots/${filenamify((new Date().toLocaleString()), {replacement: "_"})}/`;
+        this.screenshotDir = screenshotDir;
+        console.log(`Screenshots for this session are saved in: ${screenshotDir}`);
+        await fs.ensureDir(this.screenshotDir);
     });
+
+    // before each testcase runs, create and lanuch the brower object
+    beforeEach(async function(this: ITestContext) {
+        try {
+            this.screenshot = async (): Promise<string> => {
+                const filename = `${this.screenshotDir}/${this.uuid}.png`;
+                await this.page.screenshot({ path: filename, fullPage: true });
+                return filename;
+            };
+
+            this.uuid = uuidv1();
+            this.browser = await puppeteer.launch({
+                headless: false,
+                slowMo: 250,
+            });
+            this.page = await this.browser.pages().then(pageArray => pageArray[0]);
+            await this.page.setViewport({ width: pageWidth, height: pageHeight });
+            // this.page = await this.browser.newPage();
+        } catch (ex) {
+            throw ex;
+        }
+
+    });
+
+    // after each testcase runs, create and lanuch the brower object
+    afterEach(async function(this: ITestContext) {
+        await this.screenshot();
+        await this.browser.close();
+
+    });
+
     /**********************************************************************************************************
      *          Test 1: github homepage has a title containing 'GitHub'
      *********************************************************************************************************/
-    it("github homepage has a title containing 'GitHub'", async function(this: {browser: puppeteer.Browser}) {
+    it("github homepage has a title containing 'GitHub'", async function(this: ITestContext) {
         // go to url
         const browser = this.browser;
-        const page = await browser.newPage();
+        const page = this.page;
         await page.goto("https://github.com/");  
         
         // gather title text and verify text
@@ -54,10 +105,10 @@ describe("GitHub Web Example", function() {
     /**********************************************************************************************************
      *          Test 2: verify search functionality Github Blog
      *********************************************************************************************************/
-    it("verify search functionality Github Blog", async function(this: {browser: puppeteer.Browser}) {
+    fit("verify search functionality Github Blog", async function(this: ITestContext) {
         // go to url
         const browser = this.browser;
-        const page = await browser.newPage();
+        const page = this.page;
         await page.goto("https://github.com/");
 
         // example of console log message
@@ -66,6 +117,7 @@ describe("GitHub Web Example", function() {
         // gather title text and verify text
         const titleHome = await page.title();
         expect(titleHome).toContain("GitHub");
+        await this.screenshot("01_Homepage.png");
 
         // 1st example to wait for page to load: by using genaric selector of the "blog link"
         await page.waitForSelector(
@@ -96,6 +148,7 @@ describe("GitHub Web Example", function() {
             (el: any): string => el.innerText);
         // console.log("02_BlogTitle = " + pageTextBlog );
         expect(pageTextBlog).toContain("The GitHub Blog");
+        await this.screenshot("02_BlogTitle.png");
 
 
         // enter some text in the search field and press enter
@@ -111,7 +164,8 @@ describe("GitHub Web Example", function() {
             (el: any): string => el.innerText);
         // console.log("03_BlogSearchDate = " + pageSearchTxt );
         expect(pageSearchTxt).toContain("July 12, 2017");
+        await this.screenshot("03_BlogSearchDate.png");
 
-    }, 30000); // 30sec testcase time out
+    }, 40000); // 40sec testcase time out
 
 });

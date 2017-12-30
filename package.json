@@ -1,15 +1,22 @@
 {
-  "name": "jasmine-web-tests",
+  "name": "jasmine-web-test-example",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "@types/filenamify": "^2.0.1",
+    "@types/fs-extra": "^5.0.0",
     "@types/jasmine": "^2.8.2",
     "@types/puppeteer": "^0.13.6",
+    "@types/uuid": "^3.4.3",
+    "filenamify": "^2.0.0",
+    "fs": "0.0.1-security",
+    "fs-extra": "^5.0.0",
     "jasmine": "^2.8.0",
     "jasmine-spec-reporter": "^4.2.1",
     "jasmine-ts": "^0.2.1",
-    "puppeteer": "^0.13.0"
+    "puppeteer": "^0.13.0",
+    "uuid": "^3.1.0"
   },
   "scripts": {
     "test": "jasmine-ts \"spec/**/*.spec.ts\""
