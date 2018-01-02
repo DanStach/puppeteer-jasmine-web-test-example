@@ -19,7 +19,7 @@
 import * as filenamify from "filenamify";
 import * as fs from "fs-extra";
 import * as puppeteer from "puppeteer";
-import * as uuidv1 from "uuid/v1";
+import * as uuidv1 from "uuid";
 
 /***************************************************************************************************************
  *                              Global Variables
@@ -51,7 +51,9 @@ interface ITestContext {
 describe("GitHub Web Example", function() {
 
     beforeAll(async function(this: ITestContext) {
-        const screenshotDir = `./screenshots/${filenamify((new Date().toLocaleString()), {replacement: "_"})}/`;
+        const folderName = new Date().toISOString().replace(/-|:/g,"_").replace(".", "_M").replace("T", "_T");
+        // const screenshotDir = `./screenshots/${filenamify((new Date().toLocaleString()), {replacement: "_"})}/`;
+        const screenshotDir = `./screenshots/${folderName}/`;
         this.screenshotDir = screenshotDir;
         console.log(`Screenshots for this session are saved in: ${screenshotDir}`);
         await fs.ensureDir(this.screenshotDir);
@@ -99,13 +101,14 @@ describe("GitHub Web Example", function() {
         // gather title text and verify text
         const title = await page.title(); // get the title and save it to a variable 
         expect(title).toContain("GitHub"); // verify it contains the correct text
+        await this.screenshot("TC01_Homepage_Title.png");
     }, 15000); // 15sec testcase time out
 
 
     /**********************************************************************************************************
      *          Test 2: verify search functionality Github Blog
      *********************************************************************************************************/
-    fit("verify search functionality Github Blog", async function(this: ITestContext) {
+    it("verify search functionality Github Blog", async function(this: ITestContext) {
         // go to url
         const browser = this.browser;
         const page = this.page;
