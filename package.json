@@ -19,6 +19,7 @@
     "uuid": "^3.1.0"
   },
   "scripts": {
+    "clean": "rm -rf ./screenshots/*",
     "test": "jasmine-ts \"spec/**/*.spec.ts\""
   },
   "author": "",
